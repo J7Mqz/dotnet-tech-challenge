@@ -8,6 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var issuer = builder.Configuration["Jwt:Issuer"];
+        var audience = builder.Configuration["Jwt:Audience"];
+        var key = builder.Configuration["Jwt:Key"]; // <-- Añadir esta línea
+
+        Console.WriteLine($"--- ProductsApi JWT Config ---");
+        Console.WriteLine($"Issuer: {issuer}");
+        Console.WriteLine($"Audience: {audience}");
+        Console.WriteLine($"Key: {key}"); // <-- Añadir esta línea
+        Console.WriteLine($"----------------------------");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,

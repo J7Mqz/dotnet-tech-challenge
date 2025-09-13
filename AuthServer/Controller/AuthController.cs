@@ -22,30 +22,61 @@ namespace AuthServer.Controller
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            if (request.Username != "admin" || request.Password != "password")
+
+            var issuer = _config["Jwt:Issuer"];
+            var audience = _config["Jwt:Audience"];
+            var key = _config["Jwt:Key"]; // <-- Añadir esta línea
+
+            Console.WriteLine($"--- AuthServer JWT Config ---");
+            Console.WriteLine($"Issuer: {issuer}");
+            Console.WriteLine($"Audience: {audience}");
+            Console.WriteLine($"Key: {key}"); // <-- Añadir esta línea
+            Console.WriteLine($"---------------------------");
+            try // <-- INICIO DEL BLOQUE DE DEPURACIÓN
             {
-                return Unauthorized();
+                if (request.Username != "admin" || request.Password != "password")
+                {
+                    return Unauthorized();
+                }
+
+                var jwtKey = _config["Jwt:Key"];
+
+                // Verificación para asegurarnos que la clave no es nula
+                if (string.IsNullOrEmpty(jwtKey))
+                {
+                    throw new InvalidOperationException("Jwt:Key no está configurada en appsettings.json");
+                }
+
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+                var claims = new[]
+                {
+            new Claim(JwtRegisteredClaimNames.Sub, "user_id_123"),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+                var token = new JwtSecurityToken(
+                  issuer: _config["Jwt:Issuer"],
+                  audience: _config["Jwt:Audience"],
+                  claims: claims,
+                  expires: DateTime.UtcNow.AddMinutes(60),
+                  signingCredentials: credentials);
+
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return Ok(new { access_token = tokenString, expires_in = 3600 });
             }
-
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
+            catch (Exception ex) // <-- LA TRAMPA PARA LA EXCEPCIÓN
             {
-                new Claim(JwtRegisteredClaimNames.Sub, "user_id_123"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                // Imprimimos el error directamente a la consola
+                Console.WriteLine("----------- ERROR CAPTURADO EN AUTHCONTROLLER -----------");
+                Console.WriteLine(ex.ToString());
+                Console.WriteLine("-------------------------------------------------------");
 
-            var token = new JwtSecurityToken(
-              issuer: _config["Jwt:Issuer"],
-              audience: _config["Jwt:Audience"],
-              claims: claims,
-              expires: DateTime.UtcNow.AddMinutes(60),
-              signingCredentials: credentials);
-
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return Ok(new { access_token = tokenString, expires_in = 3600 });
+                // Volvemos a lanzar el error para que el comportamiento no cambie
+                throw;
+            }
         }
     }
 }

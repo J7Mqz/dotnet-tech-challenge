@@ -1,7 +1,8 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ProductsPublisherAPI.Controllers
 {
@@ -90,7 +91,9 @@ namespace ProductsPublisherAPI.Controllers
     }
 
     // Clases auxiliares para deserializar las respuestas
-    public class AuthResponse { public string AccessToken { get; set; } }
+    public class AuthResponse {
+        [JsonPropertyName("access_token")]
+        public string AccessToken { get; set; } }
     public class PagedProductsResponse { public List<Product> Items { get; set; } }
     public class Product { public string ExternalId { get; set; } public string Name { get; set; } public decimal Price { get; set; } public string Currency { get; set; } }
 }
