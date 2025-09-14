@@ -1,22 +1,15 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using ProductsApi.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<IProductService, ProductService>();
 // --- INICIO DE LA CONFIGURACIÓN JWT ---
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var issuer = builder.Configuration["Jwt:Issuer"];
-        var audience = builder.Configuration["Jwt:Audience"];
-        var key = builder.Configuration["Jwt:Key"]; // <-- Añadir esta línea
-
-        Console.WriteLine($"--- ProductsApi JWT Config ---");
-        Console.WriteLine($"Issuer: {issuer}");
-        Console.WriteLine($"Audience: {audience}");
-        Console.WriteLine($"Key: {key}"); // <-- Añadir esta línea
-        Console.WriteLine($"----------------------------");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -34,8 +27,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Esta línea ahora debería funcionar sin errores
-// Reemplaza tu builder.Services.AddSwaggerGen(); con esto:
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -47,7 +38,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Autenticación JWT usando el esquema Bearer. Ingresa 'Bearer' [espacio] y luego tu token.\n\nEjemplo: 'Bearer 12345abcdef'"
+        Description = "Autenticación JWT usando el esquema Bearer. Ingresa tu token.\n\nEjemplo: '12345abcdef'"
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -70,12 +61,11 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    // Y estas líneas también
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

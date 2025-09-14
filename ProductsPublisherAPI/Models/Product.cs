@@ -1,4 +1,4 @@
-﻿namespace ProductsApi.Models
+﻿namespace ProductsPublisherAPI.Models
 {
     public class Product
     {
@@ -6,6 +6,6 @@
         public string Name { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public string Currency { get; set; } = string.Empty;
-        public DateTime UpdatedAtUtc { get; set; }
     }
+
 }

@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  auth-server:
+    container_name: auth-server
+    build:
+      context: .
+      dockerfile: AuthServer/Dockerfile
+    ports:
+      - "5101:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+
+  products-api:
+    container_name: products-api
+    build:
+      context: .
+      dockerfile: ProductsApi/Dockerfile
+    ports:
+      - "5201:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+
+  products-publisher-api:
+    container_name: products-publisher-api
+    build:
+      context: .
+      dockerfile: ProductsPublisherAPI/Dockerfile
+    ports:
+      - "5301:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      - auth-server
+      - products-api
+
+  sql-server-db:
+    container_name: sql-server-db
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+
+  queue-worker:
+    container_name: queue-worker
+    build:
+      context: .
+      dockerfile: QueueWorker/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__ServiceBus=${SERVICEBUS_CONNECTION}
+      - ConnectionStrings__Database=${DATABASE_CONNECTION}
+    depends_on:
+      - sql-server-db
+
+volumes:
+  mssql-data:

@@ -1,3 +1,5 @@
+using ProductsPublisherAPI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // --- INICIO DE CONFIGURACIÓN ---
@@ -19,6 +21,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddScoped<IProductPublishingService, ProductPublishingService>();
+
 // --- FIN DE CONFIGURACIÓN ---
 
 var app = builder.Build();
@@ -29,6 +34,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
