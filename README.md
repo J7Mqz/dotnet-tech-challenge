@@ -1,4 +1,4 @@
-﻿📦 Reto Técnico .NET - Sistema de Procesamiento de Productos
+📦 Reto Técnico .NET - Sistema de Procesamiento de Productos
 
 
 
@@ -58,7 +58,7 @@ Docker
 
 Docker Compose
 
-&nbsp;(incluido en Docker Desktop)
+ (incluido en Docker Desktop)
 
 
 
@@ -94,9 +94,23 @@ El proyecto usa Entity Framework Core.
 
 Puedes crear la base de datos y su esquema ejecutando migraciones:
 
+1. Abrir la consola del símbolo del sistema y acceder a la ruta raíz del proyecto
 
+2\. Crear y ejecutar la base de datos 
+ 2.1 docker-compose up -d sql-server-db
 
-dotnet ef database update --project QueueWorker
+3\. Pasamos a la capeta del worker desde el símbolo del sistema
+
+&nbsp;3.1 ejecutar el comando para crear la base de datos
+
+&nbsp; 3.2 dotnet ef database update --project QueueWorker.csproj
+	(Si se presenta algún error en este punto comprueba que en el worker el archivo appsettingsDevelopment.json y appsettingsDevelopment.json se encuentre 
+
+&nbsp;	correctamente configurado con tus credenciales tanto del sql server como del service bus del azure y además al ejecutar el comando debería
+
+&nbsp; 	tener la cadena de conexión de la base de datos asi:"Server=**localhost**,1433;Dat..." con localhost para crear la base de datos ya que con:"Server=sql-server-db,1433;Dat..." presenta error,
+
+&nbsp;	IMPORTANTE: después de que creemos la base de datos debemos cambiar con "Server=sql-server-db,1433;Dat..." para la compatibilidad con Docker)
 
 
 
@@ -110,7 +124,7 @@ dotnet ef database update --project QueueWorker
 
 
 
-Es necesario crear archivos appsettings.Development.json con los secretos de conexión.
+Es necesario editar archivos appsettings.Development.json y appsettingsDevelopment.json con los secretos de conexión.
 
 
 
@@ -124,11 +138,11 @@ Crear en: ProductsPublisherAPI/appsettings.Development.json
 
 {
 
-&nbsp; "ConnectionStrings": {
+  "ConnectionStrings": {
 
-&nbsp;   "ServiceBus": "TU\_CONNECTION\_STRING\_DE\_AZURE\_SERVICE\_BUS"
+    "ServiceBus": "TU\_CONNECTION\_STRING\_DE\_AZURE\_SERVICE\_BUS"
 
-&nbsp; }
+  }
 
 }
 
@@ -144,13 +158,13 @@ Crear en: QueueWorker/appsettings.Development.json
 
 {
 
-&nbsp; "ConnectionStrings": {
+  "ConnectionStrings": {
 
-&nbsp;   "ServiceBus": "TU\_CONNECTION\_STRING\_DE\_AZURE\_SERVICE\_BUS",
+    "ServiceBus": "TU\_CONNECTION\_STRING\_DE\_AZURE\_SERVICE\_BUS",
 
-&nbsp;   "Database": "Server=localhost,1433;Database=ProductsDB;User=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
+    "Database": "Server=sql-server-db,1433;Database=ProductsDB;User=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
 
-&nbsp; }
+  }
 
 }
 
