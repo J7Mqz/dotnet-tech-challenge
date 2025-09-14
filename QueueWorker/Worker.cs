@@ -16,7 +16,12 @@ namespace QueueWorker
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            string serviceBusConnectionString = "keyAzureBus";
+
+            string serviceBusConnectionString = configuration.GetConnectionString("ServiceBus");
+
+            if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+                throw new ArgumentException("No hay conexion del servicio bus");
+
             _serviceBusClient = new ServiceBusClient(serviceBusConnectionString);
         }
 

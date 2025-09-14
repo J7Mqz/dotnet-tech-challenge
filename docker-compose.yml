@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   auth-server:
     container_name: auth-server
@@ -11,7 +9,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-
+    networks:
+      - app-network
   products-api:
     container_name: products-api
     build:
@@ -22,6 +21,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+    networks:
+      - app-network
 
   products-publisher-api:
     container_name: products-publisher-api
@@ -33,9 +34,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__ServiceBus=${SERVICEBUS_CONNECTION}
     depends_on:
       - auth-server
       - products-api
+    networks:
+      - app-network
 
   sql-server-db:
     container_name: sql-server-db
@@ -47,6 +51,13 @@ services:
       - "1433:1433"
     volumes:
       - mssql-data:/var/opt/mssql
+    networks:
+      - app-network
+    healthcheck:
+     test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q "SELECT 1" || exit 1
+     interval: 10s
+     timeout: 5s
+     retries: 5
 
   queue-worker:
     container_name: queue-worker
@@ -57,8 +68,14 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__ServiceBus=${SERVICEBUS_CONNECTION}
       - ConnectionStrings__Database=${DATABASE_CONNECTION}
+    networks:
+          - app-network
     depends_on:
-      - sql-server-db
-
+     sql-server-db:
+        condition: service_healthy
 volumes:
   mssql-data:
+  
+networks:
+  app-network:
+    driver: bridge

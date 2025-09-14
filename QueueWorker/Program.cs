@@ -10,7 +10,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddDbContext<ProductsDbContext>(options =>
 {
     // Reemplaza la línea de configuración con tu cadena directa
-    string dbConnectionString = "Server=localhost,1433;Database=ProductsDB;User=sa;Password=TechChallenge_123!;TrustServerCertificate=True;";
+    string dbConnectionString = builder.Configuration.GetConnectionString("Database");
     options.UseSqlServer(dbConnectionString);
 });
 
