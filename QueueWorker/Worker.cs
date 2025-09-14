@@ -16,7 +16,7 @@ namespace QueueWorker
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            string serviceBusConnectionString = "Endpoint=sb://retotech.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=mn5J2o2e85bxNN2IpgiwKc8eUWx5tyiG7+ASbFhPCWA=";
+            string serviceBusConnectionString = "keyAzureBus";
             _serviceBusClient = new ServiceBusClient(serviceBusConnectionString);
         }
 
